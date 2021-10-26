@@ -5,6 +5,8 @@ import random
 import rouge
 import ijson
 from pathlib import Path
+import pandas as pd
+import math
 
 
 class JSONIterator:
@@ -27,6 +29,10 @@ class Batcher:
         self.iterator = iter(self.iterator_orig)
         self.fill_cache()
         return self
+
+    def __len__(self):
+        print(len(self.iterator_orig))
+        return math.ceil(len(self.iterator_orig) / self.batch_size)
 
     def fill_cache(self):
         try:
@@ -83,17 +89,15 @@ def get_lm_dict(train_file: Path, review_key: str = "text"):
     word_count = {}
     word_dict = {}
 
-    iterator = JSONIterator(train_file)
+    iterator = pd.read_csv(train_file, chunksize=1)
 
     i = 0
     for inst in tqdm(iterator):
         i += 1
-        if i > 50000:
-            break
-
-        tokens = inst[review_key].strip().split()
-        for review in inst[review_key]:
-            tokens += review.strip().split()
+        if inst[review_key].isna().all():
+            continue
+        tokens = inst[review_key].iloc[0].strip().split()
+        
 
         for token in tokens:
             if token not in word_count:
