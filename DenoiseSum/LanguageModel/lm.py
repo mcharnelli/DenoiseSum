@@ -4,6 +4,9 @@ import torch.nn.functional as F
 
 import numpy as np
 
+from DenoiseSum.LanguageModel.data import string_to_tokens
+from DenoiseSum.utils import pad
+
 class LM(nn.Module):
 
   def __init__(self, word_size, 
@@ -70,3 +73,12 @@ class LM(nn.Module):
     batch_loss = batch_loss.mean()
 
     return batch_loss
+
+  def predict(self, txt:str, word_dict:dict):
+      tokens = string_to_tokens(txt, word_dict)
+      x_batch, x_mask = pad([tokens])
+      x_batch = torch.tensor(x_batch)
+      x_mask = torch.tensor(x_mask).float()
+      p = self(x_batch, None, training=False)
+      print(p)
+      return p
