@@ -24,9 +24,9 @@ if __name__ == '__main__':
   parser.add_argument('--eval_every', default=2500, type=int)
   parser.add_argument('--stop_after', default=40, type=int)
 
-  parser.add_argument('--train_file', default='train.json', type=str)
-  parser.add_argument('--dev_file', default='dev.json', type=str)
-  parser.add_argument('--test_file', default='test.json', type=str)
+  parser.add_argument('--train_file', default='reviews_small_train.csv', type=str)
+  parser.add_argument('--dev_file', default='reviews_small_validation.csv', type=str)
+  parser.add_argument('--test_file', default='reviews_small_test.csv', type=str)
 
   parser.add_argument('--model_file', default='lm.model', type=str)
   parser.add_argument('--sos', default=2, type=int)
@@ -36,10 +36,10 @@ if __name__ == '__main__':
 
   args = parser.parse_args()
   args.train_file = DATA_PATH / args.dataset / args.train_file
-  args.dev_file =  DATA_PATH / args.dataset / args.train_file
-  args.test_file = DATA_PATH / args.dataset / args.train_file
+  args.dev_file =  DATA_PATH / args.dataset / args.dev_file
+  args.test_file = DATA_PATH / args.dataset / args.test_file
 
-  
+  (DATA_PATH / 'model' / args.dataset).mkdir(parents = True, exist_ok=True)
   args.model_file = DATA_PATH / 'model' / args.dataset / args.model_file 
 
   train_language_model(args)
