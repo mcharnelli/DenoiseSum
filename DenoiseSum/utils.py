@@ -7,7 +7,7 @@ import ijson
 from pathlib import Path
 import pandas as pd
 import math
-
+import spacy
 
 class JSONIterator:
     def __init__(self, file_path: Path):
@@ -88,7 +88,7 @@ def get_movies(file):
 def get_lm_dict(train_file: Path, review_key: str = "text"):
     word_count = {}
     word_dict = {}
-
+    nlp = spacy.load("it_core_news_lg")
     iterator = pd.read_csv(train_file, chunksize=1)
 
     i = 0
@@ -96,10 +96,9 @@ def get_lm_dict(train_file: Path, review_key: str = "text"):
         i += 1
         if inst[review_key].isna().all():
             continue
-        tokens = inst[review_key].iloc[0].strip().split()
-        
-
-        for token in tokens:
+        sentence = inst[review_key].iloc[0].strip()
+        for token in nlp(sentence):
+            token = token.text
             if token not in word_count:
                 word_count[token] = 0
             word_count[token] += 1
