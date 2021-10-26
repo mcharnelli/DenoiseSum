@@ -3,26 +3,48 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.utils.data.dataset import BufferedShuffleDataset
 from tqdm.auto import tqdm
 from DenoiseSum.LanguageModel.data import LanguageModelData
 
 from DenoiseSum.LanguageModel.lm import LM
 from DenoiseSum.utils import get_lm_dict, pad, Batcher
 
+import pickle
+import os.path
+
+from torch.utils.data import DataLoader
+
 
 def train_language_model(args):
-    word_dict = get_lm_dict(args.train_file)
+    replace_word_dict = True
+    folder = args.train_file.parent
+    file_name = args.train_file.name
+    word_dict_file = file_name.split(".")[0] + "word_dict.pickle"
+    word_dict_file = word_dict_file.replace("train", "")
+    word_dict_file = folder / word_dict_file
+    print(args.train_file)
+
+    if not replace_word_dict and os.path.exists(word_dict_file):
+        with open(word_dict_file, "rb") as handle:
+            word_dict = pickle.load(handle)
+
+    else:
+        word_dict = get_lm_dict(args.train_file)
+        with open(word_dict_file, "wb") as handle:
+            pickle.dump(word_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     word_size = len(word_dict)
 
     x_train = LanguageModelData(args.train_file, word_dict, "text")
     x_dev = LanguageModelData(args.dev_file, word_dict, "text")
 
     x_train_batcher = Batcher(x_train, args.batch_size)
-    x_dev_batcher =  Batcher(x_dev, args.batch_size)
+    x_dev_batcher = Batcher(x_dev, args.batch_size)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    device = torch.device('cpu')
+    device = torch.device("cpu")
     model = LM(word_size, args.word_dim, args.hidden_dim)
     model.to(device)
 
@@ -42,8 +64,9 @@ def train_language_model(args):
     for epoch in range(args.num_epoch):
         if stop_count <= 0:
             break
-
-        for batch in tqdm(x_train_batcher):
+        bar = tqdm(x_train_batcher)
+        bar.set_description(f"Epoch {epoch}")
+        for i_batch, batch in enumerate(bar):
             if stop_count <= 0:
                 x_train_batcher.close()
                 break
@@ -56,7 +79,6 @@ def train_language_model(args):
 
             batch_loss = model(x_batch, x_mask)
             losses.append(batch_loss.item())
-            print(losses)
 
             batch_loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 3)
@@ -74,8 +96,8 @@ def train_language_model(args):
                         model.eval()
 
                         x_batch, x_mask = pad(x_dev_batch)
-                        x_batch = torch.tensor(x_batch).cuda()
-                        x_mask = torch.tensor(x_mask).float().cuda()
+                        x_batch = torch.tensor(x_batch).to(device)
+                        x_mask = torch.tensor(x_mask).float().to(device)
 
                         batch_loss = model(x_batch, x_mask)
                         dev_loss.append(batch_loss.item())
@@ -96,7 +118,7 @@ def train_language_model(args):
 
                     tqdm.write(
                         "Epoch: %d, Batch: %d, Train Loss: %.4f, Dev Loss: %.4f"
-                        % (epoch, 0, train_loss, dev_loss)
+                        % (epoch, i_batch, train_loss, dev_loss)
                     )
                     losses = []
                     eval_count = args.eval_every
