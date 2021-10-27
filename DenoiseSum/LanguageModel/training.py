@@ -3,7 +3,6 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data.dataset import BufferedShuffleDataset
 from tqdm.auto import tqdm
 from DenoiseSum.LanguageModel.data import LanguageModelData
 
@@ -18,6 +17,7 @@ from torch.utils.data import DataLoader
 
 def train_language_model(args):
     replace_word_dict = True
+    retrain_model = False
     folder = args.train_file.parent
     file_name = args.train_file.name
     word_dict_file = file_name.split(".")[0] + "word_dict.pickle"
@@ -53,7 +53,8 @@ def train_language_model(args):
     )
     best_loss = 1000
 
-    if os.path.exists(args.model_file):
+    
+    if retrain_model and os.path.exists(args.model_file):
         best_point = torch.load(args.model_file)
         model.load_state_dict(best_point["state_dict"])
         optimizer.load_state_dict(best_point["optimizer"])

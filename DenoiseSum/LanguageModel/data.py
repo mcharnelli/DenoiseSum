@@ -1,5 +1,7 @@
 from os import path
 from pathlib import Path
+
+import spacy
 from DenoiseSum.utils import JSONIterator
 from tqdm.auto import tqdm
 import ijson
@@ -7,13 +9,15 @@ import pandas as pd
 from torch.utils.data import IterableDataset
 import csv
 
+nlp = spacy.load("it_core_news_lg")
 
 def string_to_tokens(text: str, word_dict:dict):
     sos = word_dict['<s>']
     eos = word_dict['</s>']
-    tokens = text.strip().split()
+    sentence = text.strip()
     ids = []
-    for token in tokens:
+    for token in nlp(sentence):
+        token = token.text
         if token not in word_dict:
             ids.append(word_dict["<unk>"])
         else:
