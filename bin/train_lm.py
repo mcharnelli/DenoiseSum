@@ -20,7 +20,7 @@ if __name__ == '__main__':
   parser.add_argument('--hidden_dim', default=512, type=int)
   parser.add_argument('--disc_size', default=50, type=int)
 
-  parser.add_argument('--num_epoch', default=20, type=int)
+  parser.add_argument('--num_epoch', default=2, type=int)
   parser.add_argument('--eval_every', default=2500, type=int)
   parser.add_argument('--stop_after', default=40, type=int)
 
