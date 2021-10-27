@@ -31,7 +31,6 @@ class Batcher:
         return self
 
     def __len__(self):
-        print(len(self.iterator_orig))
         return math.ceil(len(self.iterator_orig) / self.batch_size)
 
     def fill_cache(self):
