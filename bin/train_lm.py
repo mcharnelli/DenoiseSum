@@ -20,13 +20,13 @@ if __name__ == '__main__':
   parser.add_argument('--hidden_dim', default=512, type=int)
   parser.add_argument('--disc_size', default=50, type=int)
 
-  parser.add_argument('--num_epoch', default=2, type=int)
+  parser.add_argument('--num_epoch', default=20, type=int)
   parser.add_argument('--eval_every', default=2500, type=int)
   parser.add_argument('--stop_after', default=40, type=int)
 
-  parser.add_argument('--train_file', default='reviews_small_train.csv', type=str)
-  parser.add_argument('--dev_file', default='reviews_small_validation.csv', type=str)
-  parser.add_argument('--test_file', default='reviews_small_test.csv', type=str)
+  parser.add_argument('--train_file', default='reviews_large_train.csv', type=str)
+  parser.add_argument('--dev_file', default='reviews_large_validation.csv', type=str)
+  parser.add_argument('--test_file', default='reviews_large_test.csv', type=str)
 
   parser.add_argument('--model_file', default='lm.model', type=str)
   parser.add_argument('--sos', default=2, type=int)
