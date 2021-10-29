@@ -72,8 +72,8 @@ if __name__ == "__main__":
     df = df[df["text"] != ""]
     print(df.shape)
 
-    sample = df.sample(10000)
-
+    #sample = df.sample(10000)
+    sample = df.copy()
     train, test = train_test_split(sample, test_size=0.1)
     train, validation = train_test_split(train, test_size=0.1)
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     print(test.shape)
     print(validation.shape)
 
-    sample.to_csv(PATH / "reviews_small.csv", index=False)
-    train.to_csv(PATH / "reviews_small_train.csv", index=False)
-    test.to_csv(PATH / "reviews_small_test.csv", index=False)
-    validation.to_csv(PATH / "reviews_small_validation.csv", index=False)
+    sample.to_csv(PATH / "reviews_large.csv", index=False)
+    train.to_csv(PATH / "reviews_large_train.csv", index=False)
+    test.to_csv(PATH / "reviews_large_test.csv", index=False)
+    validation.to_csv(PATH / "reviews_large_validation.csv", index=False)
