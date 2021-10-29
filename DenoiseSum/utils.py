@@ -19,6 +19,27 @@ class JSONIterator:
 
 
 class Batcher:
+    def __init__(self, list, batch_size):
+       self.batch_size = batch_size
+       self.list = list
+    
+    def __iter__(self):
+       np.random.shuffle(self.list)
+       self.i = 0
+       return self
+   
+    def __len__(self):
+        return math.ceil(len(self.list) / self.batch_size)
+   
+    def __next__(self):
+       if self.i == len(self.list):
+           raise StopIteration
+       ni = min(self.i + self.batch_size, len(self.list))
+       out = self.list[self.i:ni]
+       self.i = ni
+       return out
+
+class BatcherOld:
     def __init__(self, iterator, batch_size):
         self.batch_size = batch_size
         self.iterator_orig = iterator
@@ -88,14 +109,14 @@ def get_lm_dict(train_file: Path, review_key: str = "text"):
     word_count = {}
     word_dict = {}
     nlp = spacy.load("it_core_news_lg")
-    iterator = pd.read_csv(train_file, chunksize=1)
+    iterator = pd.read_csv(train_file)
 
     i = 0
-    for inst in tqdm(iterator):
+    for inst in tqdm(iterator.itertuples()):
         i += 1
-        if inst[review_key].isna().all():
+        if getattr(inst,review_key) is None:
             continue
-        sentence = inst[review_key].iloc[0].strip()
+        sentence = getattr(inst, review_key).strip()
         for token in nlp(sentence):
             token = token.text
             if token not in word_count:
