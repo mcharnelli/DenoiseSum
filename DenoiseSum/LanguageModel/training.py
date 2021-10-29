@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader
 
 
 def train_language_model(args):
-    replace_word_dict = True
+    replace_word_dict = False
     retrain_model = False
     folder = args.train_file.parent
     file_name = args.train_file.name
@@ -39,12 +39,12 @@ def train_language_model(args):
     x_train = LanguageModelData(args.train_file, word_dict, "text")
     x_dev = LanguageModelData(args.dev_file, word_dict, "text")
 
-    x_train_batcher = Batcher(x_train, args.batch_size)
-    x_dev_batcher = Batcher(x_dev, args.batch_size)
+    x_train_batcher = Batcher(x_train.data1, args.batch_size)
+    x_dev_batcher = Batcher(x_dev.data1, args.batch_size)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    device = torch.device("cpu")
+    #device = torch.device("cpu")
     model = LM(word_size, args.word_dim, args.hidden_dim)
     model.to(device)
 
