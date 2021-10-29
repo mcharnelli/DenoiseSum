@@ -30,10 +30,16 @@ class LanguageModelData(IterableDataset):
         self.review_key = review_key
         self.word_dict = word_dict
         self.length =sum(1 for line in csv.reader(open(self.file_path))) - 1
+        data = pd.read_csv(self.file_path)
+        self.data1 = []
+        for i, b in tqdm(data.iterrows()):
+            text = b[self.review_key]
+            self.data1.append(string_to_tokens(text, self.word_dict))
 
     def __iter__(self):
-        self.iterator = pd.read_csv(self.file_path, chunksize=1)
-        return self
+        return iter(self.data1)
+        #self.iterator = pd.read_csv(self.file_path, chunksize=1)
+        #return self
 
     def __next__(self):
 
